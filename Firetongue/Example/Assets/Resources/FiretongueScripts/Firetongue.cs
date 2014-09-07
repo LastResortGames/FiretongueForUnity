@@ -59,7 +59,17 @@ public class Firetongue
 
     private Action _callback_finished;
 
+    /// <summary>
+    /// List of file nodes to be loaded at start
+    /// </summary>
     private List<XmlNode> _list_files;
+
+    /// <summary>
+    /// List of file nodes to be loaded based on current scene.
+    /// </summary>
+    private Dictionary<string, List<XmlNode>> _unique_list_files;
+
+    private string _group_name;
     private int _files_loaded = 0;
 
     private int _safety_bit = 0;
@@ -129,7 +139,7 @@ public class Firetongue
     /// <param name="check_missing_">if true, compares against default locale for missing files/flags</param>
     /// <param name="replace_missing_">if true, replaces any missing files & flags with default locale values</param>
     /// <param name="directory_">Alternate directory to look for locale. Otherwise, assumes "Resources/locales". Must be relative to the Resources folder</param>
-    public void init(string locale_, Action finished_ = null, bool check_missing_ = false, bool replace_missing_ = false, string directory_ = "")
+    public void init(string locale_, string group_ = "", Action finished_ = null, bool check_missing_ = false, bool replace_missing_ = false, string directory_ = "")
     {
         Debug.Log("LocaleData.init(" + locale_ + "," + finished_ + "," + check_missing_ + "," + replace_missing_ +"," +directory_+")");
        
@@ -143,7 +153,7 @@ public class Firetongue
         }
 
         _callback_finished = finished_;
-
+        _group_name = group_;
         _check_missing = false;
         _replace_missing = false;
 
@@ -199,6 +209,7 @@ public class Firetongue
         string str = "";
         try
         {
+            Debug.Log(index[flag]);
             str = (index.ContainsKey(flag) ? index[flag] : "");
 
             if (str != null && str != "")
@@ -338,15 +349,15 @@ public class Firetongue
                 switch (index_flag)
                 {
                     case "$UI_LANGUAGE":	//return the localized word "LANGUAGE"
-                        if (nativeNode.SelectSingleNode("descendant::ui") != null && nativeNode.SelectSingleNode("descendant::ui").Attributes["language"] != null)
+                        if (nativeNode.SelectSingleNode("child::ui") != null && nativeNode.SelectSingleNode("child::ui").Attributes["language"] != null)
                         {
-                            return currLangNode.SelectSingleNode("descendant::ui").Attributes["language"].Value;
+                            return currLangNode.SelectSingleNode("child::ui").Attributes["language"].Value;
                         }
                         break;
                     case "$UI_REGION":		//return the localized word "REGION"
-                        if (nativeNode.SelectSingleNode("descendant::ui") != null && nativeNode.SelectSingleNode("descendant::ui").Attributes["region"] != null)
+                        if (nativeNode.SelectSingleNode("child::ui") != null && nativeNode.SelectSingleNode("child::ui").Attributes["region"] != null)
                         {
-                            return currLangNode.SelectSingleNode("descendant::ui").Attributes["region"].Value;
+                            return currLangNode.SelectSingleNode("child::ui").Attributes["region"].Value;
                         }
                         break;
                     case "$LANGUAGE":		//return the name of this language in CURRENT language
@@ -465,9 +476,9 @@ public class Firetongue
         try
         {
             XmlNode xml = _index_font[str];
-            if (xml != null && xml.SelectSingleNode("descendant::font") != null)
+            if (xml != null && xml.SelectSingleNode("child::font") != null)
             {
-                replace = xml.SelectSingleNode("descendant::font").Attributes["replace"].Value;
+                replace = xml.SelectSingleNode("child::font").Attributes["replace"].Value;
             }
             if (replace == "" || replace == null)
             {
@@ -487,9 +498,9 @@ public class Firetongue
         try
         {
             XmlNode xml = _index_font[str];
-            if (xml != null && xml.SelectSingleNode("descendant::font") != null && xml.SelectSingleNode("descendant::font").SelectSingleNode("descendant::size") != null)
+            if (xml != null && xml.SelectSingleNode("child::font") != null && xml.SelectSingleNode("child::font").SelectSingleNode("child::size") != null)
             {
-                foreach (XmlNode sizeNode in xml.SelectSingleNode("descendant::font").SelectSingleNode("descendant::size"))
+                foreach (XmlNode sizeNode in xml.SelectSingleNode("child::font").SelectSingleNode("child::size"))
                 {
                     string sizestr = size.ToString();
                     if (sizeNode.Attributes["value"].Value == sizestr)
@@ -532,7 +543,7 @@ public class Firetongue
         _index_font = new Dictionary<String, XmlNode>();
 
         loadRootDirectory();		//make sure we can find our root directory
-
+        
         //Load all the files in our list of files
         foreach (XmlNode fileNode in _list_files)
         {
@@ -544,16 +555,43 @@ public class Firetongue
             if (value != "")
             {
                 onLoadFile(loadFile(fileNode));
-                
+
                 if (_check_missing)
                 {
-                    onLoadFile(loadFile(fileNode,true));
+                    onLoadFile(loadFile(fileNode, true));
                 }
             }
             else
             {
                 Debug.Log("ERROR: undefined file in localization index");
 
+            }
+        }
+
+        //Load all the files in our list of files
+        if (!string.IsNullOrEmpty(_group_name) && _unique_list_files.Count != 0)
+        {
+            foreach (XmlNode fileNode in _unique_list_files[_group_name])
+            {
+                string value = "";
+                if (fileNode.Attributes["value"] != null)
+                {
+                    value = fileNode.Attributes["value"].Value;
+                }
+                if (value != "")
+                {
+                    onLoadFile(loadFile(fileNode));
+
+                    if (_check_missing)
+                    {
+                        onLoadFile(loadFile(fileNode, true));
+                    }
+                }
+                else
+                {
+                    Debug.Log("ERROR: undefined file in localization index. Group Name: " + _group_name);
+
+                }
             }
         }
     }
@@ -573,6 +611,7 @@ public class Firetongue
 
     private Texture2D loadImage(string fname)
     {
+        
         Texture2D img = null;
         try
         {
@@ -611,6 +650,7 @@ public class Firetongue
             else
             {
                 text = Resources.Load<TextAsset>(_directory + "locales/" + fname).text.Replace('\"', '\x22');
+                
             }
         }
         catch (Exception e)
@@ -657,8 +697,7 @@ public class Firetongue
         string dirpath = "";
         string bestLocale = "";
         int bestDiff = 99999;
-        ///TODO
-        dirpath = "samples/HelloWorlds/Assets/locales/";
+        dirpath = "FileGroups/locales/";
 
         Debug.Log("--> looking in: " + dirpath);
 
@@ -730,7 +769,9 @@ public class Firetongue
 
     private List<string> getDirectoryContents(string str)
     {
+        Debug.Log("Get locale folders. " + str);
         List<string> arr = new List<string>();
+        
         DirectoryInfo info = new DirectoryInfo(Application.dataPath + "/Resources/"+ str);
         if (info != null)
         {
@@ -753,6 +794,7 @@ public class Firetongue
         XmlDocument xml = null;
 
         _list_files = new List<XmlNode>();
+        _unique_list_files = new Dictionary<string, List<XmlNode>>();
 
         if (index == "" || index == null)
         {
@@ -763,11 +805,25 @@ public class Firetongue
             xml = new XmlDocument();
             xml.LoadXml(index);
             //Create a list of file metadata from the list in the index
-            if (xml.SelectSingleNode("descendant::data") != null && xml.SelectSingleNode("descendant::data").SelectNodes("descendant::file").Count != 0)
+            if (xml.SelectSingleNode("child::data") != null && xml.SelectSingleNode("child::data").SelectNodes("child::file").Count != 0)
             {
-                foreach (XmlNode fileNode in xml.SelectSingleNode("descendant::data").SelectNodes("descendant::file"))
+                foreach (XmlNode fileNode in xml.SelectSingleNode("child::data").SelectNodes("child::file"))
                 {
                     _list_files.Add(copyFast(fileNode));
+                }
+            }
+            if (xml.SelectSingleNode("child::data") != null && xml.SelectSingleNode("child::data").SelectNodes("child::fileGroup").Count != 0)
+            {
+                foreach (XmlNode fileGroupNode in xml.SelectSingleNode("child::data").SelectNodes("child::fileGroup"))
+                {
+                    if (fileGroupNode != null && fileGroupNode.Attributes["id"].Value.Equals(_group_name) && fileGroupNode.SelectNodes("child::file").Count != 0)
+                    {
+                        _unique_list_files.Add(_group_name, new List<XmlNode>());
+                        foreach (XmlNode fileNode in fileGroupNode.SelectNodes("child::file"))
+                        {
+                            _unique_list_files[fileGroupNode.Attributes["id"].Value].Add(copyFast(fileNode));
+                        }
+                    }
                 }
             }
         }
@@ -790,9 +846,8 @@ public class Firetongue
         }
 
         string id = "";
-        foreach (XmlNode localeNode in xml.SelectSingleNode("descendant::data").SelectNodes("descendant::locale"))
+        foreach (XmlNode localeNode in xml.SelectSingleNode("child::data").SelectNodes("child::locale"))
         {
-            Debug.Log(localeNode.Attributes.Count);
             id = localeNode.Attributes["id"].Value;
             _index_locales[id] = localeNode;
 
@@ -821,10 +876,10 @@ public class Firetongue
         }
 
         //Load and store all the translation notes
-        foreach (XmlNode noteNode in xml.SelectSingleNode("descendant::data").SelectNodes("descendant::note"))
+        foreach (XmlNode noteNode in xml.SelectSingleNode("child::data").SelectNodes("child::note"))
         {
             id = noteNode.Attributes["id"].Value;
-            foreach (XmlNode textNode in noteNode.SelectSingleNode("descendant::text").ChildNodes)
+            foreach (XmlNode textNode in noteNode.SelectSingleNode("child::text").ChildNodes)
             {
                 string lid = textNode.Attributes["id"].Value;
                 string[] larr = null;
@@ -946,7 +1001,7 @@ public class Firetongue
     {
         _files_loaded++;
 
-        if (_files_loaded == _list_files.Count)
+        if (_files_loaded == _list_files.Count + 1)
         {
 
             _loaded = true;
@@ -1026,7 +1081,7 @@ public class Firetongue
                 //If only two non-comment fields, 
                 //Assume it's the standard ("flag","value") pattern
                 //Just write the first cell
-                Debug.Log(row.Count + " " + row[0]);
+                Debug.Log(row.Count + " " + row[0] + " " + row[1]);
                 writeIndex(_index, flag, row[1], id, check_vs_default);
             }
         }
@@ -1053,6 +1108,7 @@ public class Firetongue
         {
             //just store the flag/translation pair
             _index[flag] = value;
+            Debug.Log("write " + flag + " " + value);
         }
     }
 
@@ -1110,9 +1166,9 @@ public class Firetongue
 
     private void processFonts(XmlDocument xml)
     {
-        if (xml != null && xml.SelectSingleNode("descendant::data") != null && xml.SelectSingleNode("descendant::data").SelectNodes("descendant::font").Count != 0)
+        if (xml != null && xml.SelectSingleNode("child::data") != null && xml.SelectSingleNode("child::data").SelectNodes("child::font").Count != 0)
         {
-            foreach (XmlNode fontNode in xml.SelectSingleNode("descendant::data").SelectNodes("descendant::font"))
+            foreach (XmlNode fontNode in xml.SelectSingleNode("child::data").SelectNodes("child::font"))
             {
                 string value = fontNode.Attributes["value"].Value;
                 _index_font[value] = copyFast(fontNode);

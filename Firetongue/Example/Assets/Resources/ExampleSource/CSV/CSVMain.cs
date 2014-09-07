@@ -25,6 +25,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System;
+using System.IO;
 
 public class CSVMain : MonoBehaviour
 {
@@ -52,19 +53,19 @@ public class CSVMain : MonoBehaviour
                     if (i >= 0 && i < locales.Count)
                     {
                         locale = locales[i];
-                        tongue.init(locale, new Action(onFinish), true);
+                        tongue.init(locale, "scene2", new Action(onFinish), true, false, "FileGroups/");
                     }
                 }
             }
         }
-
+       
     }
 
     public void Start()
     {
 
         tongue = new Firetongue();
-        tongue.init("en-US", new Action(onFinish), true);
+        tongue.init("en-US", "scene2", new Action(onFinish), true, false, "FileGroups/");
 
         locales = tongue.locales;
 

@@ -5,9 +5,10 @@
 	    The engine will NOT load any files that are not listed.	
 	-->
 	
+	<file id="fonts" value="fonts" extension="xml"/>
 	<file id="data" value="data" extension="csv"/>
 	<file id="data" value="more_data" extension="csv"/>
-	<file id="fonts" value="fonts" extension="xml"/>
+	
 	
 	
 	<!--Add locale entries here. 
