@@ -172,6 +172,26 @@ public class Firetongue
         startLoad();
     }
 
+    public void LoadNewFileGroup(string group_ = "")
+    {
+        _files_loaded -= _unique_list_files[_group_name].Count;
+        Debug.Log(_check_missing);
+        if (_check_missing)
+        {
+            if (_missing_files == null)
+            {
+                _missing_files = new List<String>();
+            }
+            if (_missing_flags == null)
+            {
+                _missing_flags = new Dictionary<string, List<string>>();
+            }
+        }
+        _group_name = group_;
+        
+        LoadFileGroup();
+    }
+
     /*****LOOKUP FUNCTIONS*****/
 
     /// <summary>
@@ -209,7 +229,6 @@ public class Firetongue
         string str = "";
         try
         {
-            Debug.Log(index[flag]);
             str = (index.ContainsKey(flag) ? index[flag] : "");
 
             if (str != null && str != "")
@@ -558,18 +577,22 @@ public class Firetongue
 
                 if (_check_missing)
                 {
-                    onLoadFile(loadFile(fileNode, true));
+                    onLoadFile(loadFile(fileNode, true),true);
                 }
             }
             else
             {
                 Debug.Log("ERROR: undefined file in localization index");
-
             }
         }
 
+        LoadFileGroup();
+    }
+
+    private void LoadFileGroup()
+    {
         //Load all the files in our list of files
-        if (!string.IsNullOrEmpty(_group_name) && _unique_list_files.Count != 0)
+        if (!string.IsNullOrEmpty(_group_name) && _unique_list_files[_group_name] != null && _unique_list_files.Count != 0)
         {
             foreach (XmlNode fileNode in _unique_list_files[_group_name])
             {
@@ -580,11 +603,13 @@ public class Firetongue
                 }
                 if (value != "")
                 {
+                    //Check desired Locale
                     onLoadFile(loadFile(fileNode));
 
                     if (_check_missing)
                     {
-                        onLoadFile(loadFile(fileNode, true));
+                        //Checks default locales
+                        onLoadFile(loadFile(fileNode, true),true);
                     }
                 }
                 else
@@ -649,13 +674,12 @@ public class Firetongue
             }
             else
             {
-                text = Resources.Load<TextAsset>(_directory + "locales/" + fname).text.Replace('\"', '\x22');
-                
+                text = Resources.Load<TextAsset>(_directory + "locales/" + fname).text.Replace('\"', '\x22');                
             }
         }
         catch (Exception e)
         {
-            Debug.Log("ERROR: loadText(" + fname + ") failed");
+            Debug.Log("ERROR: loadText(" + fname + ") failed" + "..." + text);
 
         }
         return text;
@@ -663,7 +687,15 @@ public class Firetongue
 
     private void loadRootDirectory()
     {
-        XmlNode firstFile = _list_files[0];
+        XmlNode firstFile = null;
+        if (_list_files.Count != 0)
+        {
+            firstFile = _list_files[0];
+        }
+        else if (!string.IsNullOrEmpty(_group_name) && _unique_list_files[_group_name].Count != 0)
+        {
+            firstFile = _unique_list_files[_group_name][0];
+        }
         string value = "";
         if (firstFile.Attributes["value"] != null)
         {
@@ -697,7 +729,7 @@ public class Firetongue
         string dirpath = "";
         string bestLocale = "";
         int bestDiff = 99999;
-        dirpath = "FileGroups/locales/";
+        dirpath = _directory + "locales/";
 
         Debug.Log("--> looking in: " + dirpath);
 
@@ -816,9 +848,9 @@ public class Firetongue
             {
                 foreach (XmlNode fileGroupNode in xml.SelectSingleNode("child::data").SelectNodes("child::fileGroup"))
                 {
-                    if (fileGroupNode != null && fileGroupNode.Attributes["id"].Value.Equals(_group_name) && fileGroupNode.SelectNodes("child::file").Count != 0)
+                    if (fileGroupNode != null && fileGroupNode.SelectNodes("child::file").Count != 0)
                     {
-                        _unique_list_files.Add(_group_name, new List<XmlNode>());
+                        _unique_list_files.Add(fileGroupNode.Attributes["id"].Value, new List<XmlNode>());
                         foreach (XmlNode fileNode in fileGroupNode.SelectNodes("child::file"))
                         {
                             _unique_list_files[fileGroupNode.Attributes["id"].Value].Add(copyFast(fileNode));
@@ -827,7 +859,7 @@ public class Firetongue
                 }
             }
         }
-
+        
         if (_index_locales == null)
         {
             _index_locales = new Dictionary<String, XmlNode>();
@@ -997,17 +1029,24 @@ public class Firetongue
         return fileName;
     }
 
-    private void onLoadFile(string result)
+    private void onLoadFile(string result, bool check_vs_default_ = false)
     {
-        _files_loaded++;
+        if (!check_vs_default_)
+        {
+            _files_loaded++;
+        }
+        int fileCount = _list_files.Count;
+        fileCount += (!string.IsNullOrEmpty(_group_name) ? _unique_list_files[_group_name].Count : 0);
+        Debug.Log(fileCount + " " + _files_loaded + " " + check_vs_default_);
 
-        if (_files_loaded == _list_files.Count + 1)
+        if (_files_loaded == fileCount)
         {
 
             _loaded = true;
 
             if (_check_missing)
             {
+                Debug.Log(_missing_files.Count);
                 if (_missing_files.Count == 0)
                 {
                     _missing_files = null;
@@ -1030,6 +1069,12 @@ public class Firetongue
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="csv">The CSV file</param>
+    /// <param name="id">The id of the file tag (not the file name) </param>
+    /// <param name="check_vs_default"></param>
     private void processCSV(CSV csv, string id, bool check_vs_default = false)
     {
         string flag = "";
@@ -1037,6 +1082,7 @@ public class Firetongue
 
         if (!_index_data.ContainsKey(id))
         {
+            Debug.Log(id);
             _index_data.Add(id, new Dictionary<string, string>());	//create the index for this i
         }
 
@@ -1081,7 +1127,7 @@ public class Firetongue
                 //If only two non-comment fields, 
                 //Assume it's the standard ("flag","value") pattern
                 //Just write the first cell
-                Debug.Log(row.Count + " " + row[0] + " " + row[1]);
+                //Debug.Log(row.Count + " " + row[0]);
                 writeIndex(_index, flag, row[1], id, check_vs_default);
             }
         }
@@ -1090,12 +1136,21 @@ public class Firetongue
         csv = null;
     }
 
+    /// <summary>
+    /// Add entry to dictionary
+    /// </summary>
+    /// <param name="_index">The dictionary of terms</param>
+    /// <param name="flag">The Key of the term</param>
+    /// <param name="value">The value of the term</param>
+    /// <param name="id">The id of the file tag (not the file name)</param>
+    /// <param name="check_vs_default"></param>
     private void writeIndex(Dictionary<string, string> _index, string flag, string value, string id, bool check_vs_default = false)
     {
+        Debug.Log(id + " " +value + " "  + locale);
         if (check_vs_default && _check_missing)
         {
             //flag exists in default locale but not current locale
-            if (_index.ContainsKey(flag) == false)
+            if (!_index.ContainsKey(flag))
             {
                 logMissingFlag(id, flag);
                 if (_replace_missing)
@@ -1117,14 +1172,20 @@ public class Firetongue
         if (_missing_flags.ContainsKey(id) == false)
         {
             _missing_flags[id] = new List<string>();
+            _missing_flags[id].Add(flag);
         }
-        List<string> list = _missing_flags[id];
-        list.Add(flag);
+        else if (!_missing_flags[id].Contains(flag))
+        {
+            _missing_flags[id].Add(flag);
+        }
     }
 
     private void logMissingFile(string fname)
     {
-        _missing_files.Add(fname);
+        if (!_missing_files.Contains(fname))
+        {
+            _missing_files.Add(fname);
+        }
     }
 
     private void processXML(XmlDocument xml, string id)
@@ -1192,6 +1253,18 @@ public class Firetongue
                 _list_files.RemoveAt(0);
             }
             _list_files = null;
+        }
+        if (_unique_list_files != null)
+        {
+            List<string> keys = _unique_list_files.Keys.ToList();
+            while (_unique_list_files.Count > 0)
+            {
+                for (int i = 0; i < keys.Count; i++)
+                {
+                    _unique_list_files.Remove(keys[i]);
+                }
+            }
+            _unique_list_files = null;
         }
 
         _loaded = false;
