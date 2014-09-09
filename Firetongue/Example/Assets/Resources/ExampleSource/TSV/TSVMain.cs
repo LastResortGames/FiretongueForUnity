@@ -52,7 +52,7 @@ public class TSVMain : MonoBehaviour
                     if (i >= 0 && i < locales.Count)
                     {
                         locale = locales[i];
-                        tongue.init(locale,"scene1", new Action(onFinish), true);
+                        tongue.init(locale,"", new Action(onFinish), true);
                     }
                 }
             }
@@ -64,7 +64,7 @@ public class TSVMain : MonoBehaviour
     {
 
         tongue = new Firetongue();
-        tongue.init("en-US", "scene1", new Action(onFinish), true, false, "tsv/");
+        tongue.init("en-US", "", new Action(onFinish), true, false, "tsv/");
 
         locales = tongue.locales;
 

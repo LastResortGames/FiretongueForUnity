@@ -47,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
      <Compile Include="Assets\Resources\ExampleSource\CSV\CSVMain.cs" />
+     <Compile Include="Assets\Resources\ExampleSource\FileGroup\FileGroupMain.cs" />
      <Compile Include="Assets\Resources\ExampleSource\TSV\TSVMain.cs" />
      <Compile Include="Assets\Resources\FiretongueScripts\CSV.cs" />
      <Compile Include="Assets\Resources\FiretongueScripts\Firetongue.cs" />

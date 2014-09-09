@@ -53,9 +53,10 @@ public class CSVMain : MonoBehaviour
                     if (i >= 0 && i < locales.Count)
                     {
                         locale = locales[i];
-                        tongue.init(locale, "scene2", new Action(onFinish), true, false, "FileGroups/");
+                        tongue.init(locale, "", new Action(onFinish), true);
                     }
                 }
+                
             }
         }
        
@@ -65,7 +66,7 @@ public class CSVMain : MonoBehaviour
     {
 
         tongue = new Firetongue();
-        tongue.init("en-US", "scene2", new Action(onFinish), true, false, "FileGroups/");
+        tongue.init("en-US", "", new Action(onFinish), true);
 
         locales = tongue.locales;
 

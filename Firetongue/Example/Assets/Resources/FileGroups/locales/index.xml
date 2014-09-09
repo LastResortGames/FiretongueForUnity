@@ -32,8 +32,8 @@
 		<contributors value="Lars Doucet, Level Up Labs"/>
 		<ui language="Language" region="Region" accept="Okay" />
 		<label id="en-US,en-GB,en-CA" language="English" region="United States"/>	
-        <label id="nb-NO" language="Engelsk" region="U.S.A."/>
-    </locale>    
+    <label id="nb-NO" language="Engelsk" region="U.S.A."/>
+  </locale>    
 	
 	<!--British English-->
     <locale id="en-GB" sort="1"> 
