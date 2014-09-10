@@ -21,65 +21,84 @@
  * THE SOFTWARE.
  * 
  */
-
 using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
 using System;
 using System.IO;
 
-public class CSVMain : MonoBehaviour
-{
+public class FiretongueManager : MonoBehaviour {
 
     private Firetongue tongue;
     private List<string> locales;
     public string text;
-    public TextAsset index;
+    public string currentFilePath;
+    public string currentScene;
+    public bool isFileGroups;
 
-    public CSVMain()
-    {
-    }
+	// Use this for initialization
+	void Start () {
+        tongue = new Firetongue();
+        tongue.init("en-US", currentScene, new Action(onFinish), true, false, currentFilePath);
 
+        locales = tongue.locales;
+        DontDestroyOnLoad(this);
+	}
+	
+	// Update is called once per frame
+	void Update () {
+	
+	}
     public void OnGUI()
     {
-        GUI.Label(new Rect(10, Screen.height / 2, 800, 200), text);
+        GUI.Label(new Rect(10, Screen.height / 3, 1000, 500), text);
+        if (GUI.Button(new Rect(10, 10, 150, 40), "Load from CSV"))
+        {
+            currentFilePath = "";
+            currentScene = "";
+            isFileGroups = false;
+            tongue.init("en-US", currentScene, new Action(onFinish), true, false, currentFilePath);
+        }
+        if (GUI.Button(new Rect(170, 10, 150, 32), "Load from TSV"))
+        {
+            currentFilePath = "tsv/";
+            currentScene = "";
+            isFileGroups = false;
+            tongue.init("en-US", currentScene, new Action(onFinish), true, false, currentFilePath);
+        }
+        if (GUI.Button(new Rect(330, 10, 200, 32), "Load FileGroups"))
+        {
+            currentFilePath = "FileGroups/";
+            currentScene = "scene1";
+            isFileGroups = true;
+            tongue.init("en-US", currentScene, new Action(onFinish), true, false, currentFilePath);
+        }
+        
+
         if (tongue != null && locales != null)
         {
             for (int i = 0; i < locales.Count; i++)
             {
-                if (GUI.Button(new Rect(10 + (i * 100), 10, 64, 64), tongue.getIcon(locales[i])))
+                if (GUI.Button(new Rect(10 + (i * 100), 50, 32, 32), tongue.getIcon(locales[i])))
                 {
-                    Debug.Log("onClick(" + i + ")");
                     string locale = "";
                     if (i >= 0 && i < locales.Count)
                     {
                         locale = locales[i];
-                        tongue.init(locale, "", new Action(onFinish), true);
+                        tongue.init(locale, currentScene, new Action(onFinish), true, false, currentFilePath);
                     }
                 }
-                
+            }
+            if (isFileGroups)
+            {
+                if (GUI.Button(new Rect(10, 80, 200, 32), "Load Scene 2"))
+                {
+                    tongue.LoadNewFileGroup("scene2");
+                }
             }
         }
-       
-    }
-
-    public void Start()
-    {
-
-        tongue = new Firetongue();
-        tongue.init("en-US", "", new Action(onFinish), true);
-
-        locales = tongue.locales;
-
 
     }
-
-    public void Update()
-    {
-
-        
-    }
-
-
 
     private void onFinish()
     {

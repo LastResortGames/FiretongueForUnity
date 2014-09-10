@@ -646,11 +646,7 @@ public class Firetongue
             }
             else
             {
-                Debug.Log(_directory + "locales/" + fname);
-                if (Directory.Exists(_directory + "locales/" + fname))
-                {
-                    img = Resources.Load<Texture2D>(_directory + "locales/" + fname);
-                }
+                img = Resources.Load<Texture2D>("tsv/locales/" + fname);
             }
         }
         catch (Exception e)
@@ -947,7 +943,6 @@ public class Firetongue
 
     private void printIndex(string id, Dictionary<string, object> index)
     {
-
         Debug.Log("printIndex(" + id + ")");
 
         foreach (string key in index.Keys)
@@ -1048,7 +1043,6 @@ public class Firetongue
         }
         int fileCount = _list_files.Count;
         fileCount += (!string.IsNullOrEmpty(_group_name) ? _unique_list_files[_group_name].Count : 0);
-        Debug.Log(fileCount + " " + _files_loaded + " " + check_vs_default_);
 
         if (_files_loaded == fileCount)
         {
@@ -1057,7 +1051,6 @@ public class Firetongue
 
             if (_check_missing)
             {
-                Debug.Log(_missing_files.Count);
                 if (_missing_files.Count == 0)
                 {
                     _missing_files = null;
@@ -1137,7 +1130,6 @@ public class Firetongue
                 //If only two non-comment fields, 
                 //Assume it's the standard ("flag","value") pattern
                 //Just write the first cell
-                //Debug.Log(row.Count + " " + row[0]);
                 writeIndex(_index, flag, row[1], id, check_vs_default);
             }
         }
@@ -1156,7 +1148,6 @@ public class Firetongue
     /// <param name="check_vs_default"></param>
     private void writeIndex(Dictionary<string, string> _index, string flag, string value, string id, bool check_vs_default = false)
     {
-        Debug.Log(id + " " +value + " "  + locale);
         if (check_vs_default && _check_missing)
         {
             //flag exists in default locale but not current locale
@@ -1173,7 +1164,6 @@ public class Firetongue
         {
             //just store the flag/translation pair
             _index[flag] = value;
-            Debug.Log("write " + flag + " " + value);
         }
     }
 
