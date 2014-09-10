@@ -42,6 +42,7 @@ public class FileGroupMain : MonoBehaviour
 	public void OnGUI()
 	{
 		GUI.Label(new Rect(10, Screen.height / 3, 1000, 500), text);
+        GUI.Label(new Rect(400, 200, 100, 100), Resources.Load<Texture2D>("FileGroups/locales/_flags/en-CA"));
 		if (tongue != null && locales != null)
 		{
 			for (int i = 0; i < locales.Count; i++)
@@ -56,18 +57,15 @@ public class FileGroupMain : MonoBehaviour
 						tongue.init(locale, "scene1", new Action(onFinish), true, false, "FileGroups/");
 					}
 				}
-				if (GUI.Button(new Rect(10 + (i * 100), 80, 64, 64), tongue.getIcon(locales[i])))
-				{
-					Debug.Log("onClick(" + i + ")");
-					string locale = "";
-					if (i >= 0 && i < locales.Count)
-					{
-						locale = locales[i];
-						tongue.LoadNewFileGroup("scene2");
-					}
-				}
+				
 				
 			}
+            if (GUI.Button(new Rect(10, 80, 64, 64), "Load Scene 2"))
+            {
+                string locale = "";
+
+                tongue.LoadNewFileGroup("scene2");
+            }
 		}
 		
 	}

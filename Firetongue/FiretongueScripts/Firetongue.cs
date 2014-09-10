@@ -39,7 +39,7 @@ public class Firetongue
         
     //All of the game's localization data
     private Dictionary<string, Dictionary<string, string>> _index_data;
-
+    
     //All of the locale entries
     private Dictionary<string, XmlNode> _index_locales;
 
@@ -105,7 +105,7 @@ public class Firetongue
         get
         {
             List<string> arr = new List<string>();
-            foreach (string key in _index_locales.Keys.ToArray())
+            foreach (string key in _index_locales.Keys)
             {
                 arr.Add(key);
             }
@@ -175,7 +175,7 @@ public class Firetongue
     public void LoadNewFileGroup(string group_ = "")
     {
         _files_loaded -= _unique_list_files[_group_name].Count;
-        Debug.Log(_check_missing);
+        
         if (_check_missing)
         {
             if (_missing_files == null)
@@ -187,6 +187,7 @@ public class Firetongue
                 _missing_flags = new Dictionary<string, List<string>>();
             }
         }
+
         _group_name = group_;
         
         LoadFileGroup();
@@ -203,7 +204,6 @@ public class Firetongue
     /// <returns>the translated string</returns>
     public string get(string flag, string context = "data", bool safe = true)
     {
-
         string orig_flag = flag;
         flag = flag.ToUpper();
 
@@ -244,10 +244,12 @@ public class Firetongue
                     {
                         string new_str = index[str];	//look it up again
                         if (new_str != null && new_str != "")
-                        {	//string exists
+                        {	
+                            //string exists
                             str = new_str;
                             if (str.IndexOf("<RE>") != 0)
-                            {			//if it's not ANOTHER redirect, stop looking
+                            {			
+                                //if it's not ANOTHER redirect, stop looking
                                 done = true;
                             }
                             else
@@ -257,13 +259,15 @@ public class Firetongue
                             }
                         }
                         else
-                        {				//give up
+                        {				
+                            //give up
                             done = true;
                             str = new_str;
                         }
                         failsafe++;
                         if (failsafe > 100)
-                        {	//max recursion: 100
+                        {	
+                            //max recursion: 100
                             done = true;
                             str = new_str;
                         }
@@ -307,8 +311,6 @@ public class Firetongue
             }
         }
         return str;
-
-
     }
 
     private string localeFormat(string str)
@@ -349,11 +351,13 @@ public class Firetongue
                         {
                             string lnid = lNode.Attributes["id"].Value;
                             if (lnid.IndexOf(locale) != -1)
-                            {	//if it matches the CURRENT locale
+                            {	
+                                //if it matches the CURRENT locale
                                 currLangNode = lNode;			//labels in CURRENT language
                             }
                             if (lnid.IndexOf(target_locale) != -1)
-                            {	//if it matches its own NATIVE locale
+                            {	
+                                //if it matches its own NATIVE locale
                                 nativeNode = lNode;						//labels in NATIVE language
                             }
                             if (currLangNode != null && nativeNode != null)
@@ -422,7 +426,6 @@ public class Firetongue
                         {
                             return lang + " (" + langnative + ")";
                         }
-                        break;
                     case "$LANGUAGE(REGION)":	//return something like "Inglés (Estados Unidos)" in CURRENT language (ex: curr=spanish native=english)
                         lang = getIndexString("$LANGUAGE:" + target_locale);
                         reg = getIndexString("$REGION:" + target_locale);
@@ -434,7 +437,6 @@ public class Firetongue
                 }
             }
         }
-
         return flag;
     }
 
@@ -533,7 +535,6 @@ public class Firetongue
                                 replace = size;
                             }
                         }
-
                     }
                 }
             }
@@ -615,7 +616,6 @@ public class Firetongue
                 else
                 {
                     Debug.Log("ERROR: undefined file in localization index. Group Name: " + _group_name);
-
                 }
             }
         }
@@ -646,6 +646,7 @@ public class Firetongue
             }
             else
             {
+                Debug.Log(_directory + "locales/" + fname);
                 if (Directory.Exists(_directory + "locales/" + fname))
                 {
                     img = Resources.Load<Texture2D>(_directory + "locales/" + fname);
@@ -768,7 +769,6 @@ public class Firetongue
                 bestLocale = loc;
             }
         }
-
         return bestLocale;
     }
 
@@ -801,20 +801,31 @@ public class Firetongue
 
     private List<string> getDirectoryContents(string str)
     {
-        Debug.Log("Get locale folders. " + str);
         List<string> arr = new List<string>();
-        
-        DirectoryInfo info = new DirectoryInfo(Application.dataPath + "/Resources/"+ str);
-        if (info != null)
+#if UNITY_WEBPLAYER
+        foreach (string file in _index_locales.Keys)
         {
-            FileInfo[] files = info.GetFiles();
-            foreach (FileInfo file in files)
-            {
-                arr.Add(file.FullName);
-            }
-        }   
+            arr.Add(file);
+        }
+        
+#endif
+
+#if !UNITY_WEBPLAYER
+                
+
+                    DirectoryInfo info = new DirectoryInfo(Application.dataPath + "/Resources/" + str);
+                    if (info != null)
+                    {
+                        FileInfo[] files = info.GetFiles();
+                        foreach (FileInfo file in files)
+                        {
+                            arr.Add(file.FullName);
+                        }
+                    }
+    
+#endif
         return arr;
-    }       
+    }   
        
     /// <summary>
     /// Loads and processes the index file
@@ -1082,7 +1093,6 @@ public class Firetongue
 
         if (!_index_data.ContainsKey(id))
         {
-            Debug.Log(id);
             _index_data.Add(id, new Dictionary<string, string>());	//create the index for this i
         }
 
