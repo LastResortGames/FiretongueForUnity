@@ -115,7 +115,7 @@ That said a specific CSV format is also available.
 *Properly* formatted firetongue CSV files:
 
 * Wrap each cell in a standard double-quote character, ( " ), 0x22 in UTF-8
-    * Do not use the single-quote ( ' ) or left/right quotes (Åg Åh) or anything else!
+    * Do not use the single-quote ( ' ) or left/right quotes (‚Äú ‚Äù) or anything else!
 * Separate each cell with a standard comma character ( , ), 0x2C in UTF-8
 * End each line with a comma and endline
     * FireTongue accepts both windows and unix style endlines (theoretically)
@@ -124,11 +124,11 @@ If you follow the above rules, you should be able to put just about anything ins
 
     "$EVIL_STRING","I will break it with commas, and "quotation marks" !!!",
 
-But I wouldn't push it. Use these characters instead of quotes if you can: Åg Åh, or else use one of firetongue's special replacement characters to deal with these situations:
+But I wouldn't push it. Use these characters instead of quotes if you can: ¬Åg ¬Åh, or else use one of firetongue's special replacement characters to deal with these situations:
 
     <Q>  = Standard single quotation mark ( " )
-    <LQ> = Fancy left quotation mark ( Åg )
-    <RQ> = Fancy right quotation mark ( Åh )
+    <LQ> = Fancy left quotation mark ( ‚Äú )
+    <RQ> = Fancy right quotation mark ( ‚Äù )
     <C>  = Standard comma
     <N>  = Line break
     <T>  = Tab
@@ -189,7 +189,7 @@ When you load your files, you can tell FireTongue to check for missing files and
 
     public void init(
         string locale_, 
-		string group_ = "",		
+	string group_ = "",		
         Action finished_ = null, 
         bool check_missing_ = false, 
         bool replace_missing_ = false, 
