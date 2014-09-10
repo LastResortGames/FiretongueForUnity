@@ -50,7 +50,7 @@
      <Compile Include="Assets\FiretongueScripts\Firetongue.cs" />
      <Compile Include="Assets\FiretongueScripts\Replace.cs" />
      <Compile Include="Assets\FiretongueScripts\TSV.cs" />
-     <Compile Include="Assets\Resources\ExampleSource\FiretongueManager.cs" />
+     <Compile Include="Assets\Resources\FiretongueExampleScripts\FiretongueManager.cs" />
      <None Include="Assets\Resources\locales\en-GB\fonts.xml" />
      <None Include="Assets\Resources\locales\en-CA\fonts.xml" />
      <None Include="Assets\Resources\FileGroups\locales\en-CA\fonts.xml" />
