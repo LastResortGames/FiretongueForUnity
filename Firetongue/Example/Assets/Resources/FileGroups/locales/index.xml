@@ -3,10 +3,23 @@
 	
 	<!--Add list of files you're including in your localization here
 	    The engine will NOT load any files that are not listed.	
-	-->
+	-->	
+	
 
   <file id="fonts" value="fonts" extension="xml"/>
   <file id="data" value="data" extension="tsv"/>
+  
+  <!--
+		FileGroups: To add files that you do not want loaded immediately
+		add the tag fileGroup with a unique id as shown below.
+		
+		These will be loaded with the call:
+		
+			tongue.LoadFileGroup(fileGroupID);
+		
+		You can also add a group id to the initial init() call if there 
+		is a group you want to load immediately.
+	-->
   <fileGroup id="scene1" >
     <file id="data" value="more_data" extension="tsv"/>
   </fileGroup>
