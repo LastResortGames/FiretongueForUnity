@@ -2,14 +2,15 @@ FiretongueForUnity
 ==================
 
 A translation/localization framework written in C# built for use in Unity
+
 (You can find the original Haxe project here: https://github.com/larsiusprime/firetongue)
 
 Installation 
 --
 
-Download Latest unitypackage:
+Download Latest unitypackage found at:
 
-	https://github.com/LastResortGames/FiretongueForUnity/blob/master/Firetongue/Example/Firetongue.unitypackage
+	https://github.com/LastResortGames/FiretongueForUnity/tree/master/Firetongue
 
 Running the sample
 --
@@ -52,7 +53,7 @@ As for your localization files themselves, the contents should look like this:
     * file2.txt
     * fonts.xml
 	
-NOTE: The original Firetongue project uses TSV's and CSV's (Proper CSV formatting is explained further down). Unity does not support the TSV extension but does properly read the tab character. So if you wish to use TSV's you must save them as .txt files. 
+NOTE: The original Firetongue project uses TSV's and CSV's (Proper CSV formatting is explained further down). Unity does not support the TSV extension but does properly read the tab character. So if you wish to use TSV's you must save them as .txt files. CSV's work just fine with the proper extension. TSV's still must be referred to as tsv's within the index.xml file.
 
 Provide as many tsv or csv files as you like, as well as a fonts.xml file. The TSV files contain your actual localization data, and the fonts.xml specifies font replacement rules.
 
@@ -115,7 +116,7 @@ That said a specific CSV format is also available.
 *Properly* formatted firetongue CSV files:
 
 * Wrap each cell in a standard double-quote character, ( " ), 0x22 in UTF-8
-    * Do not use the single-quote ( ' ) or left/right quotes (‚Äú ‚Äù) or anything else!
+    * Do not use the single-quote ( ' ) or left/right quotes (Åg Åh) or anything else!
 * Separate each cell with a standard comma character ( , ), 0x2C in UTF-8
 * End each line with a comma and endline
     * FireTongue accepts both windows and unix style endlines (theoretically)
@@ -127,8 +128,8 @@ If you follow the above rules, you should be able to put just about anything ins
 But I wouldn't push it. Use these characters instead of quotes if you can: ¬Åg ¬Åh, or else use one of firetongue's special replacement characters to deal with these situations:
 
     <Q>  = Standard single quotation mark ( " )
-    <LQ> = Fancy left quotation mark ( ‚Äú )
-    <RQ> = Fancy right quotation mark ( ‚Äù )
+    <LQ> = Fancy left quotation mark ( Åg )
+    <RQ> = Fancy right quotation mark ( Åh )
     <C>  = Standard comma
     <N>  = Line break
     <T>  = Tab
@@ -189,7 +190,7 @@ When you load your files, you can tell FireTongue to check for missing files and
 
     public void init(
         string locale_, 
-	string group_ = "",		
+		string group_ = "",		
         Action finished_ = null, 
         bool check_missing_ = false, 
         bool replace_missing_ = false, 
