@@ -15,7 +15,7 @@ Download Latest unitypackage found at:
 Running the sample
 --
 
-In Unity open the scene FiretongueExample found at: Assets\Resources\FiretongueExampleScripts
+In Unity open the scene FiretongueExample found at: Assets\FiretongueScripts\Resources\FiretongueExampleScripts
 
 
 Usage
