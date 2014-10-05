@@ -646,7 +646,7 @@ public class Firetongue
             }
             else
             {
-                img = Resources.Load<Texture2D>("tsv/locales/" + fname);
+                img = Resources.Load<Texture2D>(_directory + "locales/" + fname);
             }
         }
         catch (Exception e)
